@@ -7,6 +7,10 @@ const noteSchema = new mongoose.Schema({
   // notesSchema is the variable which stores the value of mongoose.Schema
   title: String,
   body: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 const Note = mongoose.model("Note", noteSchema); // The first argument, "Note", is the name you want to give to the model. This name will be used to refer to your notes in your application. The second argument, noteSchema, is the schema you defined earlier. The model will use this schema to understand the structure of your data.

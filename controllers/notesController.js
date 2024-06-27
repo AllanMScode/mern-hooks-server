@@ -1,70 +1,102 @@
 const Note = require("../models/note"); // importing note model (the blueprint)
 
 const fetchNotes = async (req, res) => {
-  // Find the notes
-  const listOfAllNotes = await Note.find();
+  try {
+    // Find the notes
+    const listOfAllNotes = await Note.find({ user: req.user._id });
 
-  // Respond with them
-  res.json({ notes: listOfAllNotes });
+    // Respond with them
+    res.json({ notes: listOfAllNotes });
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(400);
+  }
 };
 
 const fetchNote = async (req, res) => {
-  // Get the id off the url
-  const noteIdFromTheUrl = req.params.id;
+  try {
+    // Get the id off the url
+    const noteIdFromTheUrl = req.params.id;
 
-  // Find the note using that id
-  const noteFromTheDb = await Note.findById(noteIdFromTheUrl);
+    // Find the note using that id
+    const noteFromTheDb = await Note.findOne({
+      _id: noteIdFromTheUrl,
+      user: req.user._id,
+    });
 
-  // Respond with the note
-  res.json({ note: noteFromTheDb });
+    // Respond with the note
+    res.json({ note: noteFromTheDb });
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(400);
+  }
 };
 
 // POST - Create a new note
 const createNote = async (req, res) => {
-  // Get the sent in data off request body
-  const titleFromRequestBody = req.body.title;
-  const bodyFromRequestBody = req.body.body;
+  try {
+    // Get the sent in data off request body
+    const titleFromRequestBody = req.body.title;
+    const bodyFromRequestBody = req.body.body;
 
-  // Create a note with it (take the values from the request body / frontend and insert in the database)
-  const ourCreatedNote = await Note.create({
-    title: titleFromRequestBody,
-    body: bodyFromRequestBody,
-  });
+    // Create a note with it (take the values from the request body / frontend and insert in the database)
+    const ourCreatedNote = await Note.create({
+      title: titleFromRequestBody,
+      body: bodyFromRequestBody,
+      user: req.user._id,
+    });
 
-  // respond with the new note (this will be our response in postman / developer tools)
-  res.json({ note: ourCreatedNote });
+    // respond with the new note (this will be our response in postman / developer tools)
+    res.json({ note: ourCreatedNote });
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(400);
+  }
 };
 
 const updateNote = async (req, res) => {
-  // Get the id off the url
-  const noteIdFromTheUrl = req.params.id;
+  try {
+    // Get the id off the url
+    const noteIdFromTheUrl = req.params.id;
 
-  // Get the data off the req body
-  const titleFromRequestBody = req.body.title;
-  const bodyFromRequestBody = req.body.body;
+    // Get the data off the req body
+    const titleFromRequestBody = req.body.title;
+    const bodyFromRequestBody = req.body.body;
 
-  // Find and update the record
-  await Note.findByIdAndUpdate(noteIdFromTheUrl, {
-    title: titleFromRequestBody,
-    body: bodyFromRequestBody,
-  });
+    // Find and update the record
+    await Note.findOneAndUpdate(
+      { _id: noteIdFromTheUrl, user: req.user._id },
+      {
+        title: titleFromRequestBody,
+        body: bodyFromRequestBody,
+      }
+    );
 
-  //   Find updated note (using it's id)
-  const updatedNote = await Note.findById(noteIdFromTheUrl);
+    //   Find updated note (using it's id)
+    const updatedNote = await Note.findById(noteIdFromTheUrl);
 
-  // Respond with the updated note (after finding it)
-  res.json({ note: updatedNote });
+    // Respond with the updated note (after finding it)
+    res.json({ note: updatedNote });
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(400);
+  }
 };
 
 const deleteNote = async (req, res) => {
-  // get id off the url
-  const noteIdFromTheUrl = req.params.id;
+  try {
+    // get id off the url
+    const noteIdFromTheUrl = req.params.id;
 
-  // Delete the record
-  await Note.deleteOne({ _id: noteIdFromTheUrl });
+    // Delete the record
+    await Note.deleteOne({ _id: noteIdFromTheUrl, user: req.user._id });
 
-  // Respond with a message (eg: note deleted)
-  res.json({ success: "Record deleted" });
+    // Respond with a message (eg: note deleted)
+    res.json({ success: "Record deleted" });
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(400);
+  }
 };
 
 // when we use module.exports, we can only export one thing (here, one function), but we need to export 5 functions. So in order to export all of them, we export an object that contains all the stuff we want to export.
